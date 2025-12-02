@@ -1,0 +1,37 @@
+# sections not to push to github
+# ----- ENVIRONMENT VARIABLES -----
+.env
+*.env
+
+# ----- PYTHON -----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ----- VIRTUAL ENV -----
+venv/
+env/
+.venv/
+
+# ----- EDITORS -----
+.vscode/
+.idea/
+
+# ----- OS FILES -----
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ----- LOGS -----
+*.log
+logs/
+
+# ----- DATABASE FILES -----
+*.sql
+*.dump
+*.backup
+
+# ----- TEMP -----
+*.tmp
+
