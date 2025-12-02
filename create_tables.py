@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # load .env variables
 load_dotenv()
 
-def DB_Operations():
+def Create_Tables():
     try:
         conn = psycopg2.connect(
             host = os.getenv("DB_HOST"),
@@ -58,7 +58,7 @@ def DB_Operations():
         cur.execute("""
             create table if not exists Doctors (
                 doctor_id int generated always as identity primary key,
-                user_id int unique references users(user_id),
+                user_id int unique references Users(user_id),
                 speciality varchar(100),
                 license_number varchar(50),
                 phone varchar(20),
@@ -70,7 +70,7 @@ def DB_Operations():
         cur.execute("""
             create table if not exists Patients (
                 patient_id int generated always as identity primary key,
-                user_id int unique references users(user_id),
+                user_id int unique references Users(user_id),
                 date_of_birth date,
                 gender varchar(10),
                 emergency_contact varchar(100)
@@ -158,7 +158,7 @@ def DB_Operations():
 
 def main():
     print("- - - working with postgresql db - - -")
-    DB_Operations()
+    Create_Tables()
 
 
 if __name__ == "__main__":
