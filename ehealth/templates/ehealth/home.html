@@ -1,0 +1,80 @@
+{% extends 'ehealth/main.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section" style="background:#f8faff; padding:60px 0;">
+    <div class="row align-items-center">
+
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold">Your Health,<br> Anywhere, Anytime.</h1>
+            <p class="lead">
+                Instantly connect with certified doctors via secure video and chat.
+            </p>
+
+            <a href="/login/" class="btn btn-primary btn-lg me-3">Login</a>
+            <a href="/register/" class="btn btn-outline-primary btn-lg">Register</a>
+        </div>
+
+        <div class="col-md-6 text-center">
+            <img src="{% static 'ehealth/images/doctor-hero.jpg' %}"
+                 class="img-fluid rounded shadow-lg"
+                 alt="Doctor Online">
+        </div>
+
+    </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section class="container my-5">
+    <h2 class="text-center fw-bold mb-4">How It Works</h2>
+
+    <div class="row text-center">
+
+        <div class="col-md-4">
+            <h4>1. Create an Account</h4>
+            <p>Sign up </p>
+        </div>
+
+        <div class="col-md-4">
+            <h4>2. Book Appointments</h4>
+            <p>Select a doctor and schedule a consultation online.</p>
+        </div>
+
+        <div class="col-md-4">
+            <h4>3. Video or Chat</h4>
+            <p>Join secure video calls or chat from anywhere.</p>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- FEATURES SECTION -->
+<section class="container my-5">
+    <h2 class="text-center fw-bold mb-4">Our Services</h2>
+
+    <div class="row text-center">
+
+        <div class="col-md-3">
+            <div class="p-3 shadow-sm rounded bg-light">24/7 Support</div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 shadow-sm rounded bg-light">Medical Records</div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 shadow-sm rounded bg-light">Vitals Tracking</div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 shadow-sm rounded bg-light">Secure Messaging</div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

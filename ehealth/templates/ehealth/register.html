@@ -1,0 +1,35 @@
+{% extends 'ehealth/main.html' %}
+{% load static %}
+
+{% block content %}
+<h1 class="mb-4">Register</h1>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input type="text" name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Select Role</label>
+        <select name="role" class="form-control" required>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+        </select>
+    </div>
+
+    <button class="btn btn-primary w-100">Create Account</button>
+</form>
+{% endblock %}
