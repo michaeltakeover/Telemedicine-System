@@ -32,8 +32,9 @@ def contact(request):
 urlpatterns = [
 
     path('admin/', admin.site.urls ),
-    path('', include('ehealth.urls')),
-    path('', home, name='home'),  # THIS MAKES HOME PAGE SHOW UP
+    path('', include(('ehealth.urls', 'ehealth'), namespace='ehealth')),
+
+
 
 ]
 

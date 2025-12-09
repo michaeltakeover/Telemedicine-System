@@ -1,0 +1,56 @@
+{% extends "ehealth/main.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Doctor Dashboard</h2>
+
+    <!-- Doctor Info -->
+    <div class="card p-3 mb-4">
+        <h4>Your Profile</h4>
+        <p><strong>Name:</strong> {{ doctor.user.first_name }} {{ doctor.user.last_name }}</p>
+        <p><strong>Email:</strong> {{ doctor.user.email }}</p>
+        <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+        <p><strong>License:</strong> {{ doctor.license_number }}</p>
+        <p><strong>Approved:</strong> {{ doctor.is_approved }}</p>
+    </div>
+
+    <!-- Assigned Patients -->
+    <div class="card p-3 mb-4">
+        <h4>Assigned Patients</h4>
+        <ul>
+            {% for p in assigned_patients %}
+                <li>{{ p.user.first_name }} {{ p.user.last_name }} — {{ p.mobile_number }}</li>
+            {% empty %}
+                <li>No patients assigned.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Pending Appointments -->
+    <div class="card p-3 mb-4">
+        <h4>Pending Appointments</h4>
+        <ul>
+            {% for appt in pending %}
+                <li>{{ appt.scheduled_time }} — {{ appt.patient }}</li>
+            {% empty %}
+                <li>No pending appointments.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Completed Appointments -->
+    <div class="card p-3 mb-4">
+        <h4>Completed Appointments</h4>
+        <ul>
+            {% for appt in completed %}
+                <li>{{ appt.scheduled_time }} — {{ appt.patient }}</li>
+            {% empty %}
+                <li>No completed appointments.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+{% endblock %}

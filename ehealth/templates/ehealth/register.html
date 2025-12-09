@@ -2,34 +2,117 @@
 {% load static %}
 
 {% block content %}
-<h1 class="mb-4">Register</h1>
 
-<form method="POST">
-    {% csrf_token %}
+<!-- Only style the registration section, NOT the whole page -->
+<style>
+    .register-page {
+        background: url("https://images.unsplash.com/photo-1580281657527-47f249e8f3c7?auto=format&fit=crop&w=1500&q=80")
+                    no-repeat center center;
+        background-size: cover;
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 800px;
+        margin: 40px auto;   /* keeps layout centered */
+        box-shadow: 0px 8px 25px rgba(0,0,0,0.2);
+    }
 
-    <div class="mb-3">
-        <label>Name</label>
-        <input type="text" name="name" class="form-control" required>
+    .register-card {
+        background: rgba(255, 255, 255, 0.92);
+        padding: 30px;
+        border-radius: 12px;
+        backdrop-filter: blur(6px);
+    }
+
+    h2 {
+        color: #0d47a1;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #063970;
+    }
+
+    button {
+        background-color: #0d47a1 !important;
+        border: none !important;
+        padding: 10px;
+        font-weight: bold;
+        border-radius: 8px;
+        width: 100%;
+    }
+</style>
+
+<div class="register-page">
+    <div class="register-card">
+
+        <h2>Create an Account</h2>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} text-center">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Show Form Errors -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                Please correct the errors below.
+            </div>
+        {% endif %}
+
+        <!-- Single Form -->
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit">Register</button>
+        </form>
+
     </div>
+</div>
 
-    <div class="mb-3">
-        <label>Email</label>
-        <input type="email" name="email" class="form-control" required>
-    </div>
+<!-- Dynamic Role Fields -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const roleSelect = document.getElementById("id_role");
 
-    <div class="mb-3">
-        <label>Password</label>
-        <input type="password" name="password" class="form-control" required>
-    </div>
+    const patientFields = [
+        "id_patient_date_of_birth",
+        "id_patient_mobile_number",
+        "id_patient_address",
+        "id_patient_payment_mode"
+    ];
 
-    <div class="mb-3">
-        <label>Select Role</label>
-        <select name="role" class="form-control" required>
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor</option>
-        </select>
-    </div>
+    const doctorFields = [
+        "id_doctor_date_of_birth",
+        "id_doctor_mobile_number",
+        "id_doctor_address",
+        "id_specialization",
+        "id_license_number"
+    ];
 
-    <button class="btn btn-primary w-100">Create Account</button>
-</form>
+    function updateFields() {
+        const role = roleSelect.value;
+
+        if (role === "patient") {
+            patientFields.forEach(id => document.getElementById(id).closest("p").style.display = "block");
+            doctorFields.forEach(id => document.getElementById(id).closest("p").style.display = "none");
+        }
+        else if (role === "doctor") {
+            doctorFields.forEach(id => document.getElementById(id).closest("p").style.display = "block");
+            patientFields.forEach(id => document.getElementById(id).closest("p").style.display = "none");
+        }
+    }
+
+    roleSelect.addEventListener("change", updateFields);
+    updateFields();
+});
+</script>
+
 {% endblock %}

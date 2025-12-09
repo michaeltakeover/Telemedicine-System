@@ -1,0 +1,62 @@
+{% extends "ehealth/main.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Patient Dashboard</h2>
+
+    <!-- Patient Info -->
+    <div class="card p-3 mb-4">
+        <h4>Your Profile</h4>
+        <p><strong>Name:</strong> {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+        <p><strong>Email:</strong> {{ patient.user.email }}</p>
+        <p><strong>Mobile:</strong> {{ patient.mobile_number }}</p>
+        <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
+        <p><strong>Address:</strong> {{ patient.address }}</p>
+        <p><strong>Assigned Doctor:</strong>
+            {{ patient.assigned_doctor|default:"Not assigned" }}
+        </p>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="card p-3 mb-4">
+        <h4>Upcoming Appointments</h4>
+        <ul>
+            {% for appt in upcoming_appointments %}
+                <li>{{ appt.scheduled_time }} — Doctor: {{ appt.doctor }}</li>
+            {% empty %}
+                <li>No upcoming appointments.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Vitals -->
+    <div class="card p-3 mb-4">
+        <h4>Your Recent Vitals</h4>
+        <ul>
+            {% for v in vitals %}
+                <li>{{ v.recorded_at }} —
+                    BP: {{ v.blood_pressure }},
+                    HR: {{ v.heart_rate }} bpm,
+                    Temp: {{ v.temperature }} °C
+                </li>
+            {% empty %}
+                <li>No vitals recorded yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Medical Records -->
+    <div class="card p-3 mb-4">
+        <h4>Consultation / Medical History</h4>
+        <ul>
+            {% for rec in medical_records %}
+                <li>{{ rec.created_at.date }} — {{ rec.diagnosis|truncatechars:80 }}</li>
+            {% empty %}
+                <li>No medical history available.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

@@ -147,4 +147,10 @@ MEDIA_URL = '/images/'
 STATICFILES_DIRS = [
 
     os.path.join(BASE_DIR, 'static'),
+
+
 ]
+
+AUTH_USER_MODEL = "ehealth.NewUser"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+

@@ -3,30 +3,39 @@
 
 {% block content %}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
+<div class="container mt-5" style="max-width: 450px;">
+    <h2 class="text-center mb-4">Login</h2>
 
-            <h2 class="fw-bold mb-4">Login</h2>
+    <!-- Django Alerts -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
-            <form method="POST">
-                {% csrf_token %}
+    <form method="POST" autocomplete="off" class="card p-4 shadow-sm">
+        {% csrf_token %}
 
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-
-                <button class="btn btn-primary w-100">Login</button>
-            </form>
-
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required placeholder="Enter email">
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required placeholder="Enter password">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3">Login</button>
+
+        <!-- Register Suggestion -->
+        <p class="mt-3 text-center">
+            Don't have an account?
+            <a href="{% url 'ehealth:register' %}">Register here</a>
+        </p>
+    </form>
 </div>
 
 {% endblock %}
