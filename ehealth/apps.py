@@ -2,4 +2,12 @@ from django.apps import AppConfig
 
 
 class EhealthConfig(AppConfig):
-    name = 'ehealth'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "ehealth"
+
+    def ready(self):
+        import ehealth.signals
+
+
+
+

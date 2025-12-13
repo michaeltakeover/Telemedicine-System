@@ -7,6 +7,19 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
+from django.shortcuts import render
+from ehealth.models import Consultation, ChatMessage
+
+def consultation_room(request, consultation_id):
+    consultation = Consultation.objects.get(id=consultation_id)
+    messages = ChatMessage.objects.filter(consultation=consultation)
+
+    return render(request, "communication/consultation_room.html", {
+        "consultation": consultation,
+        "messages": messages,
+    })
+
+'''
 @login_required
 def messages_inbox(request):
     """Messages inbox"""
@@ -96,3 +109,4 @@ def file_detail(request, file_id):
 def download_file(request, file_id):
     """Download file"""
     return redirect('communication:shared_files_list')
+'''

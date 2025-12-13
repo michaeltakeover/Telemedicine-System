@@ -1,42 +1,27 @@
-
-
-# Create your views here.
-# ehealth/views.py
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.urls import reverse
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.urls import reverse
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from .forms import CombinedRegistrationForm, AppointmentBookingForm
+
+from django.utils import timezone
+
+
 from .forms import CombinedRegistrationForm
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from .models import NewUser
+from .models import NewUser, Patient, Doctor, Appointment, VitalSign
 
 
 def home(request):
-   return render(request,'ehealth/home.html')
+    return render(request, "ehealth/home.html")
 
-def user_login(request):
-    return render(request,'ehealth/login.html')
+def support(request):
+    return render(request, "ehealth/support.html")
 
-
-def Support(request):
-    return render(request,'ehealth/Support.html')
-
-# def register(request,pk):
-   # return render(request, "ehealth/register.html")
-
-from .forms import CombinedRegistrationForm
-from .models import NewUser
 
 
 def register(request):
@@ -45,105 +30,50 @@ def register(request):
 
         if form.is_valid():
             user = form.save()
-            user.is_active = False  # disable until email activation
+            user.is_active = True
             user.save()
 
-            # generate uidb64 + token
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
 
-
             activation_link = request.build_absolute_uri(
                 reverse("ehealth:activate", kwargs={"uid": uidb64, "token": token})
-
             )
 
-            # send activation email
             send_mail(
                 subject="Activate Your Telemedicine Account",
-                message=f"Hello {user.first_name},\n\n"
-                        f"Click the link below to activate your account:\n{activation_link}",
+                message=f"Hello {user.first_name},\n\nActivate your account:\n{activation_link}",
                 from_email="noreply@telemedicine.com",
                 recipient_list=[user.email],
             )
 
-            messages.success(request,
-                "Your account has been created. Please check your email to activate your account."
-            )
-            form = CombinedRegistrationForm()  # clears form fields
-            return render(request, "ehealth/register.html", {"form": form})
+            messages.success(request, "Check your email to activate your account.")
+            return redirect("ehealth:login")
 
-
-        else:
-            messages.error(request, "There were errors in your form. Please correct them.")
     else:
         form = CombinedRegistrationForm()
 
     return render(request, "ehealth/register.html", {"form": form})
 
 
-def activate_account(request, uidb64, token):
+def activate_account(request, uid, token):
     try:
-        uid = urlsafe_base64_decode(uidb64).decode()
-        user = NewUser.objects.get(pk=uid)
-    except:
+        user = NewUser.objects.get(pk=urlsafe_base64_decode(uid).decode())
+    except NewUser.DoesNotExist:
         user = None
 
-    if user is not None and default_token_generator.check_token(user, token):
+    if user and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        messages.success(request, "Account activated! You can now log in.")
+
+        messages.success(
+            request,
+            "Account activated. Doctors require admin approval before login."
+        )
         return redirect("ehealth:login")
-    if user.role == "patient" and not hasattr(user, "patient"):
-        Patient.objects.create(user=user)
 
-
-
-    else:
-        messages.error(request, "Activation link is invalid or expired.")
-        return redirect("ehealth:register")
-
-
-
-def user_login(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        # Authenticate using email field
-        user = authenticate(request, email=email, password=password)
-
-        if user is None:
-            messages.error(request, "Invalid email or password")
-            return redirect("ehealth:login")
-
-        if not user.is_active:
-            messages.error(request, "Your account is not activated. Check your email.")
-            return redirect("ehealth:login")
-
-        # Doctor approval check
-        if user.role == "doctor":
-            doctor = getattr(user, "doctor", None)
-            if doctor and not doctor.is_approved:
-                messages.error(request, "Doctor account pending admin approval.")
-                return redirect("ehealth:login")
-
-        # Login the user
-        login(request, user)
-        messages.success(request, "Login successful!")
-
-        # Redirect based on role
-        if user.role == "doctor":
-            return redirect("ehealth:doctor_dashboard")
-
-        elif user.role == "patient":
-            return redirect("ehealth:patient_dashboard")
-
-        # Default for admin or other roles
-        return redirect("ehealth:home")
-
-    # GET request → show login page
-    return render(request, "ehealth/login.html")
+    messages.error(request, "Activation link is invalid.")
+    return redirect("ehealth:register")
 
 
 
@@ -153,82 +83,122 @@ def user_login(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Authenticate using email field
         user = authenticate(request, email=email, password=password)
 
-        if user is None:
+        if not user:
             messages.error(request, "Invalid email or password")
-            return redirect("ehealth:login")
+            return redirect("ehealth:login.html")
 
         if not user.is_active:
-            messages.error(request, "Your account is not activated. Check your email.")
-            return redirect("ehealth:login")
+            messages.error(request, "Account not activated.")
+            return redirect("ehealth:login.html")
 
-        # Doctor approval check
         if user.role == "doctor":
-            doctor = getattr(user, "doctor", None)
-            if doctor and not doctor.is_approved:
-                messages.error(request, "Doctor account pending admin approval.")
-                return redirect("ehealth:login")
+            if not hasattr(user, "doctor") or not user.doctor.is_approved:
+                messages.error(request, "Doctor account pending approval.")
+                return redirect("ehealth:login.html")
 
-        # Login the user
         login(request, user)
-        messages.success(request, "Login successful!")
 
-        # Redirect based on role
-        if user.role == "doctor":
+        if user.role == "patient":
+            return redirect("ehealth:patient_dashboard")
+        elif user.role == "doctor":
             return redirect("ehealth:doctor_dashboard")
 
-        elif user.role == "patient":
-            return redirect("ehealth:patient_dashboard")
-
-        # Default for admin or other roles
         return redirect("ehealth:home")
 
-    # GET request → show login page
     return render(request, "ehealth/login.html")
 
 
 
 
 
+@login_required
+def doctor_dashboard(request):
+    if request.user.role != "doctor":
+        messages.error(request, "Access denied.")
+        return redirect("ehealth:home")
 
 
-# Dash boards
+    doctor = request.user.doctor
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+    appointments = Appointment.objects.filter(doctor=doctor)
+
+    context = {
+        "doctor": doctor,
+        "pending_appointments": appointments.filter(status="pending")[:5],
+        "completed_appointments": appointments.filter(status="completed")[:5],
+    }
+
+    return render(request, "ehealth/doctor_dashboard.html", context)
+
+
 
 @login_required
 def patient_dashboard(request):
     if request.user.role != "patient":
+        messages.error(request, "Access denied.")
+        return redirect("ehealth:home")
+    try:
+        patient = request.user.patient
+
+    except Patient.DoesNotExist:
+        messages.error(
+            request,
+            "Your patient profile is incomplete. Please contact support."
+        )
+        redirect("ehealth:home")
+
+    context = {
+        "patient": patient,
+        "upcoming_appointments": Appointment.objects.filter(
+            patient=patient, status="pending"
+        ).order_by("appointment_date")[:5],
+
+        "past_appointments": Appointment.objects.filter(
+            patient=patient, status="completed"
+        ).order_by("-appointment_date")[:5],
+
+        "vitals": VitalSign.objects.filter(
+            patient=patient
+        ).order_by("-created_at")[:5],
+    }
+
+    return render(request, "ehealth/patient_dashboard.html", context)
+
+
+@login_required
+def book_appointment(request):
+    if request.user.role != "patient":
+        messages.error(request, "Access denied.")
         return redirect("ehealth:home")
 
     patient = request.user.patient
 
-    context = {
-        "patient": patient,
-        "upcoming_appointments": patient.appointments.filter(status="pending").order_by("scheduled_time")[:5],
-        "past_appointments": patient.appointments.filter(status="completed").order_by("-scheduled_time")[:5],
-        "vitals": patient.vitals.order_by("-recorded_at")[:5],
-        "medical_records": patient.medical_records.order_by("-created_at")[:5],
-    }
+    if request.method == "POST":
+        form = AppointmentBookingForm(request.POST, patient=patient)
 
-    return render(request, "ehealth/patient_dashboard.html", context)
-# Doctor
-@login_required
-def doctor_dashboard(request):
-    if request.user.role != "doctor":
-        return redirect("ehealth:home")
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.patient = patient
+            appointment.status = "pending"
 
-    doctor = request.user.doctor
+            #
+            child = form.cleaned_data.get("child")
+            if child and child.parent != patient:
+                messages.error(request, "Invalid child selection.")
+                return redirect("ehealth:home")
 
-    context = {
-        "doctor": doctor,
-        "assigned_patients": doctor.patients.all(),
-        "pending": doctor.appointments.filter(status="pending").order_by("scheduled_time")[:5],
-        "upcoming": doctor.appointments.filter(status="pending", scheduled_time__gte=timezone.now()),
-        "completed": doctor.appointments.filter(status="completed").order_by("-scheduled_time")[:5],
-    }
+            appointment.save()
 
-    return render(request, "ehealth/doctor_dashboard.html", context)
+            messages.success(request, "Appointment booked successfully.")
+            return redirect("ehealth:patient_dashboard")
+
+    else:
+        form = AppointmentBookingForm(patient=patient)
+
+    return render(
+        request,
+        "ehealth/book_appointment.html",
+        {"form": form}
+    )

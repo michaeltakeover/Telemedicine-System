@@ -2,8 +2,13 @@
 {% block content %}
 
 <div class="container mt-4">
-
+<!-- Appointment Booking Button -->
     <h2 class="mb-4">Patient Dashboard</h2>
+    <a href="{% url 'ehealth:book_appointment' %}"
+   class="btn btn-success mb-4">
+    Book New Appointment
+</a>
+
 
     <!-- Patient Info -->
     <div class="card p-3 mb-4">
@@ -21,13 +26,36 @@
     <!-- Upcoming Appointments -->
     <div class="card p-3 mb-4">
         <h4>Upcoming Appointments</h4>
-        <ul>
-            {% for appt in upcoming_appointments %}
-                <li>{{ appt.scheduled_time }} — Doctor: {{ appt.doctor }}</li>
-            {% empty %}
-                <li>No upcoming appointments.</li>
-            {% endfor %}
-        </ul>
+
+        {% if upcoming_appointments %}
+            <ul>
+                {% for appt in upcoming_appointments %}
+                    <li>
+                        <strong>Date:</strong>
+                        {{ appt.appointment_date|date:"M d, Y H:i" }}
+                        <br>
+
+                        <strong>Doctor:</strong>
+                        Dr. {{ appt.doctor.user.first_name }}
+                        {{ appt.doctor.user.last_name }}
+                        <br>
+
+                        <strong>For:</strong>
+                        {% if appt.child %}
+                            Child — {{ appt.child.first_name }} {{ appt.child.last_name }}
+                        {% else %}
+                            Yourself
+                        {% endif %}
+
+                        <br>
+                        <strong>Status:</strong> {{ appt.status|capfirst }}
+                    </li>
+
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No upcoming appointments.</p>
+        {% endif %}
     </div>
 
     <!-- Vitals -->
@@ -36,9 +64,11 @@
         <ul>
             {% for v in vitals %}
                 <li>{{ v.recorded_at }} —
-                    BP: {{ v.blood_pressure }},
-                    HR: {{ v.heart_rate }} bpm,
-                    Temp: {{ v.temperature }} °C
+                    Blood Pressure: {{ v.blood_pressure }},
+                    Heart Rate: {{ v.heart_rate }} bpm,
+                    Temperature: {{ v.temperature }} °C
+                    Weight: {{ v.weight }} Kgs
+
                 </li>
             {% empty %}
                 <li>No vitals recorded yet.</li>
@@ -48,9 +78,9 @@
 
     <!-- Medical Records -->
     <div class="card p-3 mb-4">
-        <h4>Consultation / Medical History</h4>
+        <h4>Consultations </h4>
         <ul>
-            {% for rec in medical_records %}
+            {% for rec in consultations %}
                 <li>{{ rec.created_at.date }} — {{ rec.diagnosis|truncatechars:80 }}</li>
             {% empty %}
                 <li>No medical history available.</li>

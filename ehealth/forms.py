@@ -1,7 +1,17 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
 from .models import NewUser, Patient, Doctor
 import uuid
+
+
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
+from .models import NewUser, Patient, Doctor
+import uuid
+from django.utils.timezone import now
+
 
 
 class CombinedRegistrationForm(UserCreationForm):
@@ -11,12 +21,9 @@ class CombinedRegistrationForm(UserCreationForm):
         ("doctor", "Doctor"),
     ]
 
-    # role dropdown
     role = forms.ChoiceField(choices=ROLE_CHOICES)
-
     username = None
 
-    # shared user fields are inside NewUser
     class Meta:
         model = NewUser
         fields = [
@@ -27,34 +34,81 @@ class CombinedRegistrationForm(UserCreationForm):
             "gender",
             "role",
         ]
-
-    # PATIENT FIELDS
+    # ✅ PATIENT fields
     patient_date_of_birth = forms.DateField(
         required=False,
-        widget=forms.DateInput(attrs={"type": "date"})
+        widget=forms.DateInput(
+            attrs={
+                "type": "date",
+                "class": "form-control"
+            }
+        )
     )
-    patient_mobile_number = forms.CharField(required=False)
-    patient_address = forms.CharField( required=False,widget=forms.TextInput(attrs={"placeholder": "Address"}))
+
+    patient_mobile_number = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
+    patient_address = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
     patient_payment_mode = forms.ChoiceField(
         required=False,
         choices=[
             ("insurance", "Insurance"),
             ("card", "Credit/Debit Card"),
             ("cash", "Cash"),
-        ]
+        ],
+        widget=forms.Select(attrs={"class": "form-control"})
     )
 
-    # DOCTOR FIELDS
+    # ✅ DOCTOR fields
     doctor_date_of_birth = forms.DateField(
         required=False,
-        widget=forms.DateInput(attrs={"type": "date"})
+        widget=forms.DateInput(
+            attrs={
+                "type": "date",
+                "class": "form-control"
+            }
+        )
     )
-    doctor_mobile_number = forms.CharField(required=False)
-    doctor_address = forms.CharField( required=False,widget=forms.TextInput(attrs={"placeholder": "Address"}))
-    specialization = forms.CharField(required=False)
-    license_number = forms.CharField(required=False)
 
-    # VALIDATION LOGIC
+    doctor_mobile_number = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
+    doctor_address = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
+    specialization = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
+    license_number = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+
+
+    # -------------------------
+    # Email validation
+    # -------------------------
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if NewUser.objects.filter(email=email).exists():
+            raise ValidationError("An account with this email already exists.")
+        return email
+
+    # -------------------------
+    # Role-based validation
+    # -------------------------
     def clean(self):
         cleaned = super().clean()
         role = cleaned.get("role")
@@ -66,7 +120,18 @@ class CombinedRegistrationForm(UserCreationForm):
                 "patient_address",
                 "patient_payment_mode",
             ]
-        else:
+
+            mobile = cleaned.get("patient_mobile_number")
+            if mobile:
+                if not mobile.isdigit():
+                    self.add_error("patient_mobile_number", "Digits only.")
+                elif Patient.objects.filter(mobile_number=mobile).exists():
+                    self.add_error(
+                        "patient_mobile_number",
+                        "This mobile number is already registered."
+                    )
+
+        elif role == "doctor":
             required_fields = [
                 "doctor_date_of_birth",
                 "doctor_mobile_number",
@@ -75,48 +140,105 @@ class CombinedRegistrationForm(UserCreationForm):
                 "license_number",
             ]
 
-        # Check required fields
+            mobile = cleaned.get("doctor_mobile_number")
+            if mobile:
+                if not mobile.isdigit():
+                    self.add_error("doctor_mobile_number", "Digits only.")
+                elif Doctor.objects.filter(mobile_number=mobile).exists():
+                    self.add_error(
+                        "doctor_mobile_number",
+                        "This mobile number is already registered."
+                    )
+
+        else:
+            raise ValidationError("Invalid role selected.")
+
         for field in required_fields:
             if not cleaned.get(field):
-                self.add_error(field, "This field is required for selected role.")
+                self.add_error(field, "This field is required.")
 
         return cleaned
 
-    # SAVE
-
+    # -------------------------
+    # SAVE (USER ONLY)
+    # -------------------------
     def save(self, commit=True):
         user = super().save(commit=False)
 
-        # Auto-generate username since it's removed
+        # Generate username
         unique_part = uuid.uuid4().hex[:6]
         user.username = f"{self.cleaned_data['first_name'].lower()}{unique_part}"
 
-        role = self.cleaned_data["role"]
-        user.role = role
-        user.is_active = False  # if you plan email activation later
+        user.role = self.cleaned_data["role"]
+        user.is_active = True
 
         if commit:
             user.save()
 
-            if role == "patient":
-                Patient.objects.create(
-                    user=user,
-                    date_of_birth=self.cleaned_data["patient_date_of_birth"],
-                    mobile_number=self.cleaned_data["patient_mobile_number"],
-                    address=self.cleaned_data["patient_address"],
-                    preferred_payment_mode=self.cleaned_data["patient_payment_mode"],
-                )
-            else:
-                Doctor.objects.create(
-                    user=user,
-                    date_of_birth=self.cleaned_data["doctor_date_of_birth"],
-                    mobile_number=self.cleaned_data["doctor_mobile_number"],
-                    address=self.cleaned_data["doctor_address"],
-                    specialization=self.cleaned_data["specialization"],
-                    license_number=self.cleaned_data["license_number"],
-                )
-
         return user
 
+# ehealth/forms.py
+from django import forms
+from ehealth.models import NewUser
+
+class UserRegistrationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = NewUser
+        fields = ["email", "password", "role", "gender", "first_name", "last_name"]
+
+    def clean_role(self):
+        role = self.cleaned_data.get("role")
+        if not role:
+            raise forms.ValidationError("Role is required")
+        return role
 
 
+from django import forms
+from .models import Appointment, ChildProfile, Doctor
+
+from django import forms
+from .models import Appointment, Doctor, ChildProfile
+
+
+class AppointmentBookingForm(forms.ModelForm):
+    child = forms.ModelChoiceField(
+        queryset=ChildProfile.objects.none(),
+        required=False,
+        empty_label="For yourself",
+        help_text="Select a child if appointment is for your child"
+    )
+
+    class Meta:
+        model = Appointment
+        fields = ["doctor", "child", "appointment_date", "reason"]
+        widgets = {
+            "appointment_date": forms.DateTimeInput(
+                attrs={
+                    "type": "datetime-local",
+                    "min": now().strftime("%Y-%m-%dT%H:%M")
+                }
+            ),
+            "reason": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        patient = kwargs.pop("patient")
+        super().__init__(*args, **kwargs)
+
+        children_qs = ChildProfile.objects.filter(parent=patient)
+
+        if children_qs.exists():
+            self.fields["child"].queryset = children_qs
+        else:
+            #  No children → remove field entirely
+            self.fields.pop("child")
+
+
+
+
+        #  Only approved doctors
+        self.fields["doctor"].queryset = Doctor.objects.filter(
+            is_approved=True
+        )

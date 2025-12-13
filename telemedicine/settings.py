@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     # new apps
 
 
-    'ehealth',
+     #'ehealth',
+    'communication',
+    "ehealth.apps.EhealthConfig",
 
 ]
 
@@ -73,6 +75,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'telemedicine.wsgi.application'
+ASGI_APPLICATION = 'telemedicine.wsgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+
 
 
 # Database
@@ -100,6 +111,8 @@ DATABASES = {
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
         'HOST': os.getenv('DATABASE_HOST'),
         'PORT': os.getenv('DATABASE_PORT'),
+
+        'CONN_MAX_AGE': 60,
     }
 }
 

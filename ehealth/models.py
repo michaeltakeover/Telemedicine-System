@@ -42,7 +42,7 @@ class NewUser(AbstractUser):
         ("male", "Male"), ("female", "Female"), ("other", "Other"),]
 
 
-    role = models.CharField(max_length=20, choices=ROLES)
+    role = models.CharField(max_length=20, choices=ROLES, blank=False, null=False)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     gender = models.CharField(max_length=10,choices=GENDER_CHOICES)
 

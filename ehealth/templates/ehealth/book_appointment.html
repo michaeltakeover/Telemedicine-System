@@ -1,0 +1,15 @@
+{% extends "ehealth/main.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Book Appointment</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary">Book Appointment</button>
+    </form>
+</div>
+
+{% endblock %}
+

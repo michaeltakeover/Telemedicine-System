@@ -33,6 +33,8 @@ urlpatterns = [
 
     path('admin/', admin.site.urls ),
     path('', include(('ehealth.urls', 'ehealth'), namespace='ehealth')),
+    path("communication/", include("communication.urls")),
+
 
 
 
