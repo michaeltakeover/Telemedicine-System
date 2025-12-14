@@ -1,0 +1,45 @@
+<h3>
+  Consultation Chat<br>
+  {{ appointment.patient.user.first_name }}
+  ↔
+  {{ appointment.doctor.user.first_name }}
+</h3>
+
+<p>Status: <b>{{ appointment.status }}</b></p>
+<hr>
+
+<div style="max-width: 700px;">
+  {% for msg in messages %}
+    <p>
+      <strong>{{ msg.sender.first_name }}:</strong>
+      {{ msg.message }}
+      <small>({{ msg.timestamp }})</small>
+    </p>
+  {% empty %}
+    <p>No messages yet.</p>
+  {% endfor %}
+</div>
+
+<hr>
+
+{% if is_read_only %}
+  <p><i>This consultation is completed. Chat is read-only.</i></p>
+{% else %}
+  <form method="post">
+    {% csrf_token %}
+    <input
+      type="text"
+      name="message"
+      placeholder="Type your message…"
+      style="width:70%"
+      required
+    >
+    <button type="submit">Send</button>
+  </form>
+{% endif %}
+
+
+
+
+
+

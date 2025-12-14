@@ -1,0 +1,49 @@
+
+{% extends "ehealth/main.html" %}
+{% block content %}
+
+<div class="container mt-4" style="max-width:600px;">
+
+    <h4 class="mb-3">
+        Prescription for {{ appointment.patient.user.get_full_name }}
+    </h4>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="mb-2">
+            {{ form.medication_name.label_tag }}
+            {{ form.medication_name }}
+            {{ form.medication_name.errors }}
+        </div>
+
+        <div class="mb-2">
+            {{ form.dosage.label_tag }}
+            {{ form.dosage }}
+            {{ form.dosage.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.instructions.label_tag }}
+            {{ form.instructions }}
+            {{ form.instructions.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            Save Prescription
+        </button>
+
+
+
+        <a href="{% url 'ehealth:consultation_chat' appointment.id %}"
+           class="btn btn-secondary ms-2">
+            Cancel
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}
+

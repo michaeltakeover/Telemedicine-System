@@ -1,0 +1,49 @@
+{% extends "ehealth/main.html" %}
+{% block content %}
+
+<div class="container mt-4" style="max-width:800px;">
+
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Prescriptions</h3>
+
+        {% if request.user == appointment.doctor.user %}
+            <a href="{% url 'ehealth:create_prescription' appointment.id %}"
+               class="btn btn-success">
+                + Add Prescription
+            </a>
+        {% endif %}
+    </div>
+
+
+    <p class="text-muted mb-4">
+        Patient: <strong>{{ appointment.patient.user.get_full_name }}</strong><br>
+        Doctor: <strong>Dr. {{ appointment.doctor.user.get_full_name }}</strong><br>
+        Date: {{ appointment.appointment_date|date:"d M Y H:i" }}
+    </p>
+
+    {% if prescriptions %}
+        {% for p in prescriptions %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <p><strong>Medication:</strong> {{ p.medication_name }}</p>
+                    <p><strong>Dosage:</strong> {{ p.dosage }}</p>
+                    <p><strong>Instructions:</strong><br>{{ p.instructions }}</p>
+                    <small class="text-muted">
+                        Prescribed on {{ p.created_at|date:"d M Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">No prescriptions available.</p>
+    {% endif %}
+
+    <a href="{% url 'ehealth:patient_dashboard' %}"
+       class="btn btn-secondary mt-3">
+        Back
+    </a>
+
+</div>
+
+{% endblock %}

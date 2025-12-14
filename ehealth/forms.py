@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from .models import NewUser, Patient, Doctor
 import uuid
 from django.utils.timezone import now
+from .models import VitalSign
+
 
 
 
@@ -235,10 +237,50 @@ class AppointmentBookingForm(forms.ModelForm):
             #  No children → remove field entirely
             self.fields.pop("child")
 
-
-
-
         #  Only approved doctors
         self.fields["doctor"].queryset = Doctor.objects.filter(
             is_approved=True
         )
+
+
+class VitalSignForm(forms.ModelForm):
+    class Meta:
+        model = VitalSign
+        fields = [
+            "blood_pressure",
+            "heart_rate",
+            "temperature",
+            "oxygen_level"
+        ]
+
+    def save(self, commit=True):
+        vital = super().save(commit=False)
+
+
+        if (
+                vital.temperature > 40.0 or
+                vital.heart_rate > 150 or
+                vital.oxygen_level < 90
+        ):
+            vital.is_abnormal = True
+        else:
+            vital.is_abnormal = False
+
+        if commit:
+            vital.save()
+
+        return vital
+
+from django import forms
+from .models import Prescription
+
+class PrescriptionForm(forms.ModelForm):
+    class Meta:
+        model = Prescription
+        fields = ["medication_name", "dosage", "instructions"]
+        widgets = {
+            "medication_name": forms.TextInput(attrs={"class": "form-control"}),
+            "dosage": forms.TextInput(attrs={"class": "form-control"}),
+            "instructions": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+

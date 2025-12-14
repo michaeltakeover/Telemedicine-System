@@ -1,0 +1,38 @@
+ Sample Patient Test Data (Fictional)
+Patient ID	Full Name	Email	Username	Strong Password
+P001	Alex Morgan	alex.morgan@testmail.com patient
+	alexm	N7!qP@9XwK#2
+P002	Sarah Collins	sarah.collins@testmail.com
+	sarahc	Rk8$L@3vZ!aQ
+P003	Daniel Wright	daniel.wright@testmail.com
+	danielw	T9^mQ!2x@PZ
+P004	Emily Turner	emily.turner@testmail.com  Doctor
+	emilyt	X@7P#Jv2m!9Q
+P005	Michael Brown	michael.brown@testmail.com
+	michaelb	L!Q8@vT#4xP
+P006	Olivia Harris	olivia.harris@testmail.com
+	oliviah	@P9xQ!KZ#2L
+P007	James O’Neil	james.oneil@testmail.com
+	jameso	Zx!8@P#LQ9m
+P008	Grace Patel	grace.patel@testmail.com
+	gracep	!P9QZ@xK#7L
+P009	Noah Kim	noah.kim@testmail.com
+	noahk	Q#Z!P9x@K7L
+P010	Ava Rodriguez	ava.rodriguez@testmail.com
+	avar	@Q9!xZP#K7L
+
+  from ehealth.models import NewUser
+
+user = NewUser.objects.get(email="emily.turner@testmail.com")
+user.doctor.id
+
+>>>
+>>> user = NewUser.objects.get(email="emily.turner@testmail.com")
+>>> user.doctor.id
+UUID('cb24ff4c-0985-4c07-9725-daf914f905e8')
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+u = User.objects.get(email="emily.turner@testmail.com")
+u.role

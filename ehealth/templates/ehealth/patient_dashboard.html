@@ -2,91 +2,167 @@
 {% block content %}
 
 <div class="container mt-4">
-<!-- Appointment Booking Button -->
-    <h2 class="mb-4">Patient Dashboard</h2>
-    <a href="{% url 'ehealth:book_appointment' %}"
-   class="btn btn-success mb-4">
-    Book New Appointment
-</a>
 
-
-    <!-- Patient Info -->
-    <div class="card p-3 mb-4">
-        <h4>Your Profile</h4>
-        <p><strong>Name:</strong> {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
-        <p><strong>Email:</strong> {{ patient.user.email }}</p>
-        <p><strong>Mobile:</strong> {{ patient.mobile_number }}</p>
-        <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
-        <p><strong>Address:</strong> {{ patient.address }}</p>
-        <p><strong>Assigned Doctor:</strong>
-            {{ patient.assigned_doctor|default:"Not assigned" }}
-        </p>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Patient Dashboard</h2>
+        <a href="{% url 'ehealth:book_appointment' %}" class="btn btn-success">
+            Book Appointment
+        </a>
     </div>
 
-    <!-- Upcoming Appointments -->
-    <div class="card p-3 mb-4">
-        <h4>Upcoming Appointments</h4>
-
-        {% if upcoming_appointments %}
-            <ul>
-                {% for appt in upcoming_appointments %}
-                    <li>
-                        <strong>Date:</strong>
-                        {{ appt.appointment_date|date:"M d, Y H:i" }}
-                        <br>
-
-                        <strong>Doctor:</strong>
-                        Dr. {{ appt.doctor.user.first_name }}
-                        {{ appt.doctor.user.last_name }}
-                        <br>
-
-                        <strong>For:</strong>
-                        {% if appt.child %}
-                            Child — {{ appt.child.first_name }} {{ appt.child.last_name }}
-                        {% else %}
-                            Yourself
-                        {% endif %}
-
-                        <br>
-                        <strong>Status:</strong> {{ appt.status|capfirst }}
-                    </li>
-
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No upcoming appointments.</p>
-        {% endif %}
+    <!-- PATIENT DETAILS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">Patient Details</div>
+        <div class="card-body">
+            <div class="row small">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                    <p><strong>Date of Birth:</strong> {{ patient.date_of_birth|date:"d M Y" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Phone:</strong> {{ patient.phone_number }}</p>
+                    <p><strong>Address:</strong> {{ patient.address }}</p>
+                    <p><strong>Role:</strong> Patient</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Vitals -->
-    <div class="card p-3 mb-4">
-        <h4>Your Recent Vitals</h4>
-        <ul>
-            {% for v in vitals %}
-                <li>{{ v.recorded_at }} —
-                    Blood Pressure: {{ v.blood_pressure }},
-                    Heart Rate: {{ v.heart_rate }} bpm,
-                    Temperature: {{ v.temperature }} °C
-                    Weight: {{ v.weight }} Kgs
+    <!-- APPOINTMENTS (FULL WIDTH) -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="mb-2">My Appointments</h5>
 
-                </li>
-            {% empty %}
-                <li>No vitals recorded yet.</li>
-            {% endfor %}
-        </ul>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead class="table-dark small">
+                        <tr>
+                            <th>#</th>
+                            <th>Doctor</th>
+                            <th>Date & Time</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                            <th>Notes</th>
+                            <th>Prescription</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for a in appointments %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+                            <td>{{ a.appointment_date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ a.reason|truncatechars:30 }}</td>
+
+                            <td>
+                                {% if a.status == "pending" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif a.status == "approved" %}
+                                    <span class="badge bg-info">Approved</span>
+                                {% elif a.status == "completed" %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- ACTION -->
+                            <td>
+                                {% if a.status == "approved" %}
+                                    <a href="{% url 'ehealth:consultation_chat' a.id %}"
+                                       class="btn btn-success btn-sm w-100">
+                                        Chat
+                                    </a>
+                                {% elif a.status == "completed" %}
+                                    <a href="{% url 'ehealth:consultation_chat' a.id %}"
+                                       class="btn btn-outline-secondary btn-sm w-100">
+                                        View Chat
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- NOTES -->
+                            <td style="max-width:200px;">
+                                {% if a.status == "completed" and a.consultation and a.consultation.notes %}
+                                    {{ a.consultation.notes|truncatechars:40 }}
+                                {% elif a.status == "completed" %}
+                                    <span class="text-muted">No notes</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- PRESCRIPTION -->
+                            <td>
+                            {% if a.status == "completed" and a.consultation and a.consultation.prescriptions.exists %}
+                                <a href="{% url 'ehealth:view_prescriptions' a.id %}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    View ({{ a.consultation.prescriptions.count }})
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No appointments found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Medical Records -->
-    <div class="card p-3 mb-4">
-        <h4>Consultations </h4>
-        <ul>
-            {% for rec in consultations %}
-                <li>{{ rec.created_at.date }} — {{ rec.diagnosis|truncatechars:80 }}</li>
-            {% empty %}
-                <li>No medical history available.</li>
-            {% endfor %}
-        </ul>
+    <!-- VITALS (BELOW APPOINTMENTS) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Vitals</h5>
+                <a href="{% url 'ehealth:add_vitals' %}" class="btn btn-sm btn-outline-primary">
+                    Add
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead class="table-dark small">
+                        <tr>
+                            <th>Date</th>
+                            <th>BP</th>
+                            <th>HR</th>
+                            <th>Temp</th>
+                            <th>O₂</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        {% for v in vitals %}
+                        <tr class="{% if v.is_abnormal %}table-danger{% endif %}">
+                            <td>{{ v.created_at|date:"d M H:i" }}</td>
+                            <td>{{ v.blood_pressure }}</td>
+                            <td>{{ v.heart_rate }}</td>
+                            <td>{{ v.temperature }}°C</td>
+                            <td>{{ v.oxygen_level }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No vitals recorded</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <small class="text-muted">
+                <span class="badge bg-danger">Red</span> = Abnormal vitals
+            </small>
+        </div>
     </div>
+
 </div>
 
 {% endblock %}

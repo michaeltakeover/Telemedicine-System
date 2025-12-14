@@ -175,7 +175,7 @@ class Appointment(models.Model):
 class VitalSign(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="vitals")
 
     blood_pressure = models.CharField(max_length=20)
     heart_rate = models.IntegerField()
@@ -183,6 +183,8 @@ class VitalSign(models.Model):
     oxygen_level = models.IntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
+    is_abnormal = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"Vitals for {self.patient.user.first_name} on {self.created_at.date()}"
@@ -199,8 +201,9 @@ class Consultation(models.Model):
         ("video", "Video Call"),
     ]
 
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
+    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE,related_name="consultation" )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
 
     consultation_type = models.CharField(max_length=20, choices=TYPE)
     notes = models.TextField(blank=True)
@@ -236,7 +239,8 @@ class ChatMessage(models.Model):
 class Prescription(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE,related_name="prescriptions")
+
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
 
     medication_name = models.CharField(max_length=255)
