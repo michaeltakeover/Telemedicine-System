@@ -49,7 +49,7 @@ def complete_appointment(request, appointment_id):
     appointment = get_object_or_404(
         Appointment,
         id=appointment_id,
-        doctor=doctor   # 🔐 ownership enforced here
+        doctor=doctor
     )
 
     appointment.status = "completed"
