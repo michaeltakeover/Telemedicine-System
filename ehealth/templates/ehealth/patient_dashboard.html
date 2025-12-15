@@ -143,7 +143,7 @@
                         {% for v in vitals %}
                         <tr class="{% if v.is_abnormal %}table-danger{% endif %}">
                             <td>{{ v.created_at|date:"d M H:i" }}</td>
-                            <td>{{ v.blood_pressure }}</td>
+                            <td>{{ v.systolic_bp }}</td>
                             <td>{{ v.heart_rate }}</td>
                             <td>{{ v.temperature }}°C</td>
                             <td>{{ v.oxygen_level }}%</td>
