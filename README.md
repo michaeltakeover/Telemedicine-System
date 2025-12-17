@@ -1,90 +1,83 @@
-Telemedicine Web Application (Django)
-Project Overview
+# 🩺 Telemedicine Web Application (Django)
 
-This project is a Telemedicine Web Application developed using Python and Django.
-The system enables patients and doctors to interact through a secure, role-based platform that supports appointment booking, consultations, medical records, and prescriptions.
+## 📖 Project Overview
+This project is a **Telemedicine Web Application** developed using **Python and Django**.  
+The system enables **patients and doctors** to interact through a **secure, role-based platform** that supports:
 
-The application demonstrates the use of:
+- Appointment booking
+- Consultations
+- Medical records management
+- Prescriptions
 
-Django’s MVT (Model–View–Template) architecture
+The application demonstrates practical implementation of:
 
-Relational database design
+- Django’s **MVT (Model–View–Template)** architecture
+- Relational database design
+- Secure authentication and authorization
+- Form handling and validation
+- Messaging, consultations, and audit-friendly workflows
 
-Secure authentication and authorization
 
-Form handling and validation
 
-Messaging, consultations, and audit-friendly workflows
+## 🏥 Problem Domain
+**Healthcare / Telemedicine**
 
-This project was developed as part of a Master’s level Continuous Assessment (CA2).
+The system addresses key challenges in modern healthcare, including:
+- Managing patient–doctor interactions remotely
+- Secure handling of sensitive medical data
+- Appointment scheduling and consultations
+- Controlled access based on defined user roles
 
-Problem Domain
+---
 
-Healthcare / Telemedicine
+## 👥 User Roles
 
-The system addresses the challenge of:
+### 👤 Patient
+- Register and log in
+- Book appointments
+- Record vital signs
+- Participate in consultations
+- View prescriptions
 
-Managing patient–doctor interactions remotely
+### 👨‍⚕️ Doctor
+- Approve appointments
+- Conduct consultations
+- Write medical notes
+- Issue prescriptions
+- View patient vitals
 
-Secure handling of medical data
+---
 
-Appointment scheduling and consultations
+## 🧱 Architectural Pattern
 
-Controlled access based on user roles
+The system follows Django’s **Model–View–Template (MVT)** architecture:
 
-User Roles
+- **Models** → Define database schema and relationships  
+- **Views** → Handle business logic and access control  
+- **Templates** → Render HTML pages using Bootstrap  
 
-Patient
+### Benefits
+- Improved maintainability
+- Clear separation of concerns
+- Enhanced scalability
 
-Register and log in
+---
 
-Book appointments
+## 🛠 Technologies Used
 
-Record vital signs
+| Component        | Technology                        |
+|------------------|-----------------------------------|
+| Backend          | Python , Django                   |
+| Frontend         | HTML5, CSS                        |
+| Database         | PostgreSQL                        |
+| Authentication  | Django Auth (Custom User Model)   |
+| Version Control | Git & GitHub                      |
 
-Participate in consultations
+---
 
-View prescriptions
+## 📁 Project Folder Structure
 
-Doctor
-
-Approve appointments
-
-Conduct consultations
-
-Write medical notes
-
-Issue prescriptions
-
-View patient vitals
-
-Architectural Pattern
-
-The system follows the Model–View–Template (MVT) pattern provided by Django:
-
-Models → Define database schema and relationships
-
-Views → Handle business logic and access control
-
-Templates → Render HTML pages using Bootstrap
-
-This layered approach improves:
-
-Maintainability
-
-Separation of concerns
-
-Scalability
-
- Technologies Used
-Component	Technology
-Backend	Python 3, Django
-Frontend	HTML5,CSS
-Database	PostgreSQL 
-Authentication	Django Auth (custom user model)
-
-Version Control	Git & GitHub
-Project Folder Structure
+```text
 CA2-PROGRAMMING/
 │
 ├── manage.py
@@ -158,13 +151,11 @@ CA2-PROGRAMMING/
 │   ├── migrations/
 │   └── __pycache__/
 │
-└── communication/                     future extension
-
- Security Features
-
+└── communication/                    # Future extension
+🔐 Security Features
 Role-based access control (Patient vs Doctor)
 
-Login required decorators
+login_required decorators
 
 Ownership checks on appointments
 
@@ -172,19 +163,20 @@ CSRF protection
 
 Server-side form validation
 
-Testing Strategy
-
+🧪 Testing Strategy
 Manual functional testing
 
 Django unit testing (models & forms)
 
-Integration testing of workflows:
+Integration testing of full workflows:
 
 Registration → Login → Dashboard
 
 Appointment booking → Approval → Consultation
 
-How to Run the Project
+▶️ How to Run the Project
+bash
+Copy code
 # Activate virtual environment
 source .venv/bin/activate
 
@@ -196,8 +188,8 @@ python manage.py migrate
 
 # Start server
 python manage.py runserver
+Then open your browser and navigate to:
 
-
-Then open:
-
+text
+Copy code
 http://127.0.0.1:8000/
