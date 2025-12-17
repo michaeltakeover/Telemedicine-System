@@ -1,20 +1,27 @@
+"""
+Patient-related views for the Telemedicine System.
+patient  appointment booking,vital sign updates, and notification workflows. Access is restricted
+to authenticated users with the patient role.
+"""
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-
+from django.utils import timezone
+from datetime import timedelta
 from ..models import Patient, Appointment
 from ..forms import AppointmentBookingForm, VitalSignForm
 from ehealth.services.notification_service import send_email_notification
 
 
 
-
-
-
-
 @login_required
 def patient_dashboard(request):
+    """
+    Displays the patient dashboard.
+    Shows the patient's profile information, appointment history,
+    """
     if request.user.role != "patient":
         messages.error(request, "Access denied.")
         return redirect("ehealth:home")
@@ -44,6 +51,10 @@ def patient_dashboard(request):
 
 @login_required
 def book_appointment(request):
+    """
+    appointment booking for patients,Allows a patient to request an appointment with an approved doctor.
+    The appointment when  created is in  a 'pending' status and a notification is sent to the selected doctor.
+    """
     if request.user.role != "patient":
         messages.error(request, "Access denied.")
         return redirect("ehealth:home")
@@ -100,11 +111,24 @@ def book_appointment(request):
 
 @login_required
 def add_vitals(request):
+    """
+    Records patient vital signs.
+    """
     if request.user.role != "patient":
         messages.error(request, "Access denied.")
         return redirect("ehealth:home")
 
     patient = request.user.patient
+
+    last_vital = patient.vitals.order_by("-created_at").first()
+
+    if last_vital:
+        time_diff = timezone.now() - last_vital.created_at
+
+        if time_diff < timedelta(hours=1):
+            remainining_time = 60 - int(time_diff.total_seconds()/60)
+            messages.error(request, f"You can record the vitals again after {remainining_time} seconds.")
+            return redirect("ehealth:view_vitals")
 
     if request.method == "POST":
         form = VitalSignForm(request.POST)

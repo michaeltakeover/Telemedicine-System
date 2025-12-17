@@ -1,3 +1,7 @@
+"""
+Models related to patient profiles within the telemedicine system.
+Includes patient details and linked child profiles.
+"""
 
 from django.db import models
 from django.conf import settings
@@ -5,6 +9,10 @@ from datetime import date
 import uuid
 
 class Patient(models.Model):
+    """
+    Represents a patient registered in the telemedicine system.
+    Each patient is linked to exactly one user account.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -35,6 +43,10 @@ class Patient(models.Model):
 
 
 class ChildProfile(models.Model):
+    """
+    Represents a child profile linked to a parent patient account.
+    This supports pediatric care and family-based medical records.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="children")
     first_name = models.CharField(max_length=100)
@@ -52,6 +64,6 @@ class ChildProfile(models.Model):
         )
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} (Child)"
+        return f"{self.first_name} {self.last_name} -Child"
 
 

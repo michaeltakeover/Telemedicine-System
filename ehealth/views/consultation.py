@@ -3,14 +3,45 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
-from ..models import Appointment, Consultation, ChatMessage, Prescription
+from ..models import Appointment, Consultation, ChatMessage, Patient,Doctor,Prescription,VitalSign
 from ..forms import PrescriptionForm
 
 
+@login_required
+def view_vitals(request, patient_id=None):
+    """
+    Shared vitals view for patient and doctor
+    """
+
+    # Patient viewing own vitals
+    if request.user.role == "patient":
+        patient = request.user.patient
+
+    #  Doctor viewing a patient's vitals
+    elif request.user.role == "doctor":
+        patient = get_object_or_404(Patient, id=patient_id)
+
+    else:
+        messages.error(request, "Access denied.")
+        return redirect("ehealth:home")
+
+    vitals = patient.vitals.order_by("-created_at")
+
+    return render(request,"ehealth/vitals_table.html",
+        {
+            "patient": patient,
+            "vitals": vitals
+        }
+    )
 
 @login_required
 def consultation_chat(request, appointment_id):
+    """
+    Manages the consultation chat between a doctor and a patient.
+    Once an appointment is marked as completed, the chat becomes
+    read-only to preserve consultation integrity.
+    """
+
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
     # Allow BOTH doctor and patient
@@ -53,6 +84,11 @@ def consultation_chat(request, appointment_id):
 
 @login_required
 def create_prescription(request, appointment_id):
+    """
+    Allows a doctor to create a prescription for a completed appointment.
+    Appointments with a status of 'completed'
+    Prescriptions are linked to both the consultation and the prescribing doctor.
+    """
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
     if (
@@ -91,6 +127,9 @@ def create_prescription(request, appointment_id):
 
 @login_required
 def save_notes(request, appointment_id):
+    """
+    Saves clinical notes entered by the assigned doctor
+    """
     appointment = get_object_or_404(Appointment, id=appointment_id)
 
     # Security: only the assigned doctor can save notes
@@ -110,6 +149,9 @@ def save_notes(request, appointment_id):
 
 @login_required
 def view_prescriptions(request, appointment_id):
+    """
+    Displays prescriptions associated with a completed consultation.
+    """
     appointment = get_object_or_404(Appointment, id=appointment_id)
     consultation = appointment.consultation
 

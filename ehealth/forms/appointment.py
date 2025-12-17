@@ -6,6 +6,7 @@ from ..models import Appointment, Doctor, ChildProfile
 
 
 class AppointmentBookingForm(forms.ModelForm):
+
     child = forms.ModelChoiceField(
         queryset=ChildProfile.objects.none(),
         required=False,

@@ -5,90 +5,90 @@
 
     <h2 class="mb-4">Doctor Dashboard</h2>
 
-<div class="container mt-4">
-
-<div class="row">
-    <!-- ================= DOCTOR PROFILE (COMPACT) ================= -->
-    <div class="col-lg-4 col-md-5 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-header fw-bold py-2">
-                Doctor Profile
-            </div>
-            <div class="card-body small">
-                <p class="mb-1">
-                    <strong>Name:</strong><br>
-                    {{ doctor.user.get_full_name }}
-                </p>
-                <p class="mb-1">
-                    <strong>Email:</strong><br>
-                    {{ doctor.user.email }}
-                </p>
-                <p class="mb-1">
-                    <strong>Specialization:</strong><br>
-                    {{ doctor.specialization }}
-                </p>
-                <p class="mb-1">
-                    <strong>License:</strong><br>
-                    {{ doctor.license_number }}
-                </p>
-                <p class="mb-0">
-                    <strong>Status:</strong><br>
-                    {% if doctor.is_approved %}
-                        <span class="badge bg-success">Approved</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% endif %}
-                </p>
+    <!-- ================= DOCTOR PROFILE ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">
+            Doctor Profile
+        </div>
+        <div class="card-body small">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1">
+                        <strong>Name:</strong> {{ doctor.user.get_full_name }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Email:</strong> {{ doctor.user.email }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Phone:</strong> {{ doctor.mobile_number }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1">
+                        <strong>Specialization:</strong> {{ doctor.specialization }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Status:</strong>
+                        {% if doctor.is_approved %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- ================= DASHBOARD CONTENT ================= -->
-    <div class="col-lg-8 col-md-7">
-        <!-- Pending / Approved / Completed tables go here -->
-
 
     <!-- ================= PENDING APPOINTMENTS ================= -->
     <div class="card shadow-sm mb-4">
         <div class="card-header fw-bold">
             Pending Appointments
         </div>
-        <div class="card-body p-2">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped align-middle mb-0">
+                <thead class="table-primary small">
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                {% for appt in pending_appointments %}
+                    <tr>
+                        <td>
+                            {{ appt.patient.user.get_full_name }}<br>
+                            <a href="{% url 'ehealth:view_vitals' appt.patient.id %}"
+                               class="btn btn-outline-info btn-sm mt-1">
+                                View Vitals
+                            </a>
+                        </td>
 
-            <div class="table-responsive">
-                <table class="table table-sm table-hover align-middle mb-0">
-                    <thead class="table-light small">
-                        <tr>
-                            <th>Patient</th>
-                            <th>Date & Time</th>
-                            <th>Reason</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        {% for appt in pending_appointments %}
-                        <tr>
-                            <td>{{ appt.patient.user.get_full_name }}</td>
-                            <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
-                            <td>{% if appt.child %}Child{% else %}Self{% endif %}</td>
-                            <td class="text-end">
-                                <a href="{% url 'ehealth:approve_appointment' appt.id %}"
-                                   class="btn btn-success btn-sm">
-                                    Approve
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-3">
-                                No pending appointments
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
+                        <td>{% if appt.child %}Child{% else %}Self{% endif %}</td>
 
+                        <td class="text-end">
+                            <a href="{% url 'ehealth:approve_appointment' appt.id %}"
+                               class="btn btn-success btn-sm">
+                                Approve
+                            </a>
+                            <a href="{% url 'ehealth:cancel_appointment' appt.id %}"
+                               class="btn btn-danger btn-sm">
+                                Cancel
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">
+                            No pending appointments
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -97,46 +97,56 @@
         <div class="card-header fw-bold">
             Approved Appointments
         </div>
-        <div class="card-body p-2">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped align-middle mb-0">
+                <thead class="table-primary small">
+                    <tr>
+                        <th>Patient</th>
+                        <th>Vitals</th>
+                        <th>Date & Time</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                {% for appt in approved_appointments %}
+                    <tr>
+                        <td>{{ appt.patient.user.get_full_name }}</td>
 
-            <div class="table-responsive">
-                <table class="table table-sm table-hover align-middle mb-0">
-                    <thead class="table-light small">
-                        <tr>
-                            <th>Patient</th>
-                            <th>Date & Time</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        {% for appt in approved_appointments %}
-                        <tr>
-                            <td>{{ appt.patient.user.get_full_name }}</td>
-                            <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'ehealth:consultation_chat' appt.id %}"
-                                       class="btn btn-success">
-                                        Chat
-                                    </a>
-                                    <a href="{% url 'ehealth:complete_appointment' appt.id %}"
-                                       class="btn btn-primary">
-                                        Complete
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-3">
-                                No approved appointments
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        <td>
+                            <a href="{% url 'ehealth:view_vitals' appt.patient.id %}"
+                               class="btn btn-outline-info btn-sm">
+                                View Vitals
+                            </a>
+                        </td>
 
+                        <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
+
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'ehealth:consultation_chat' appt.id %}"
+                                   class="btn btn-success">
+                                    Chat
+                                </a>
+                                <a href="{% url 'ehealth:complete_appointment' appt.id %}"
+                                   class="btn btn-primary">
+                                    Complete
+                                </a>
+                                <a href="{% url 'ehealth:cancel_appointment' appt.id %}"
+                                   class="btn btn-danger">
+                                    Cancel
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">
+                            No approved appointments
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -145,67 +155,63 @@
         <div class="card-header fw-bold">
             Completed Appointments
         </div>
-        <div class="card-body p-2">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped align-middle mb-0">
+                <thead class="table-primary small">
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date & Time</th>
+                        <th>Notes</th>
+                        <th>Prescription</th>
+                        <th class="text-end">Chat</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                {% for appt in completed_appointments %}
+                    <tr>
+                        <td>{{ appt.patient.user.get_full_name }}</td>
+                        <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
 
-            <div class="table-responsive">
-                <table class="table table-sm table-hover align-middle mb-0">
-                    <thead class="table-light small">
-                        <tr>
-                            <th>Patient</th>
-                            <th>Date</th>
-                            <th>Notes</th>
-                            <th>Prescription</th>
-                            <th class="text-end">Chat</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        {% for appt in completed_appointments %}
-                        <tr>
-                            <td>{{ appt.patient.user.get_full_name }}</td>
-                            <td>{{ appt.appointment_date|date:"d M Y H:i" }}</td>
+                        <!-- NOTES -->
+                        <td style="max-width:220px;">
+                            <form method="post" action="{% url 'ehealth:save_notes' appt.id %}">
+                                {% csrf_token %}
+                                <textarea name="notes"
+                                          rows="2"
+                                          class="form-control form-control-sm"
+                                          placeholder="Consultation notes">{{ appt.consultation.notes }}</textarea>
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-primary mt-1">
+                                    Save
+                                </button>
+                            </form>
+                        </td>
 
-                            <!-- NOTES -->
-                            <td style="max-width:220px;">
-                                <form method="post" action="{% url 'ehealth:save_notes' appt.id %}">
-                                    {% csrf_token %}
-                                    <textarea name="notes"
-                                              rows="2"
-                                              class="form-control form-control-sm"
-                                              placeholder="Consultation notes">{{ appt.consultation.notes }}</textarea>
-                                    <button type="submit"
-                                            class="btn btn-sm btn-outline-primary mt-1">
-                                        Save
-                                    </button>
-                                </form>
-                            </td>
+                        <!-- PRESCRIPTION -->
+                        <td>
+                            <a href="{% url 'ehealth:create_prescription' appt.id %}"
+                               class="btn btn-warning btn-sm">
+                                Add / View
+                            </a>
+                        </td>
 
-                            <!-- PRESCRIPTION -->
-                            <td>
-                                <a href="{% url 'ehealth:create_prescription' appt.id %}"
-                                   class="btn btn-warning btn-sm">
-                                    Add / View
-                                </a>
-                            </td>
-
-                            <!-- CHAT -->
-                            <td class="text-end">
-                                <a href="{% url 'ehealth:consultation_chat' appt.id %}"
-                                   class="btn btn-outline-secondary btn-sm">
-                                    View Chat
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">
-                                No completed appointments
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
+                        <!-- CHAT -->
+                        <td class="text-end">
+                            <a href="{% url 'ehealth:consultation_chat' appt.id %}"
+                               class="btn btn-outline-secondary btn-sm">
+                                View Chat
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            No completed appointments
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 

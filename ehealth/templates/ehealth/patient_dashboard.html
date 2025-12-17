@@ -30,14 +30,14 @@
         </div>
     </div>
 
-    <!-- APPOINTMENTS (FULL WIDTH) -->
+    <!-- APPOINTMENTS  -->
     <div class="row">
         <div class="col-12">
             <h5 class="mb-2">My Appointments</h5>
 
             <div class="table-responsive">
                 <table class="table table-sm table-bordered table-striped">
-                    <thead class="table-dark small">
+                    <thead class="table-primary small">
                         <tr>
                             <th>#</th>
                             <th>Doctor</th>
@@ -118,50 +118,12 @@
         </div>
     </div>
 
-    <!-- VITALS (BELOW APPOINTMENTS) -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="mb-0">Vitals</h5>
-                <a href="{% url 'ehealth:add_vitals' %}" class="btn btn-sm btn-outline-primary">
-                    Add
-                </a>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle">
-                    <thead class="table-dark small">
-                        <tr>
-                            <th>Date</th>
-                            <th>BP</th>
-                            <th>HR</th>
-                            <th>Temp</th>
-                            <th>O₂</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        {% for v in vitals %}
-                        <tr class="{% if v.is_abnormal %}table-danger{% endif %}">
-                            <td>{{ v.created_at|date:"d M H:i" }}</td>
-                            <td>{{ v.systolic_bp }}</td>
-                            <td>{{ v.heart_rate }}</td>
-                            <td>{{ v.temperature }}°C</td>
-                            <td>{{ v.oxygen_level }}%</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center">No vitals recorded</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <small class="text-muted">
-                <span class="badge bg-danger">Red</span> = Abnormal vitals
-            </small>
-        </div>
-    </div>
+   <div class="mt-4">
+    <a href="{% url 'ehealth:view_vitals' %}"
+       class="btn btn-outline-primary">
+        View  Vitals
+    </a>
+</div>
 
 </div>
 

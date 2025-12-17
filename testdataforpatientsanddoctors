@@ -2,21 +2,21 @@
 Patient ID	Full Name	Email	Username	Strong Password
 P001	Alex Morgan	alex.morgan@testmail.com patient
 	alexm	N7!qP@9XwK#2
-P002	Sarah Collins	sarah.collins@testmail.com
+P002	Sarah Collins	sarah.collins@testmail.com -Patient
 	sarahc	Rk8$L@3vZ!aQ
-P003	Daniel Wright	daniel.wright@testmail.com
+P003	Daniel Wright	daniel.wright@testmail.com patient
 	danielw	T9^mQ!2x@PZ
 P004	Emily Turner	emily.turner@testmail.com  Doctor
 	emilyt	X@7P#Jv2m!9Q
-P005	Michael Brown	michael.brown@testmail.com
+P005	Michael Brown	michael.brown@testmail.com Doctor
 	michaelb	L!Q8@vT#4xP
-P006	Olivia Harris	olivia.harris@testmail.com
+P006	Olivia Harris	olivia.harris@testmail.com Doctor
 	oliviah	@P9xQ!KZ#2L
 P007	James O’Neil	james.oneil@testmail.com
 	jameso	Zx!8@P#LQ9m
-P008	Grace Patel	grace.patel@testmail.com
+P008	Grace Patel	grace.patel@testmail.com - Patient
 	gracep	!P9QZ@xK#7L
-P009	Noah Kim	noah.kim@testmail.com
+P009	Noah Kim	noah.kim@testmail.com - doctor
 	noahk	Q#Z!P9x@K7L
 P010	Ava Rodriguez	ava.rodriguez@testmail.com
 	avar	@Q9!xZP#K7L
@@ -31,8 +31,40 @@ user.doctor.id
 >>> user.doctor.id
 UUID('cb24ff4c-0985-4c07-9725-daf914f905e8')
 
+ssh -i databasekey.pem -L 5433:localhost:5432 ubuntu@52.51.141.217
+
+psql -h localhost -p 5432 -U jackie telemedicinedb
+
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
 u = User.objects.get(email="emily.turner@testmail.com")
 u.role
+
+
+from django.core.mail import send_mail
+
+send_mail(
+    "Test Email",
+    "This is a test email.",
+    "ehealthtelemedicineie@gmail.com",
+    ["test@example.com"],
+)
+
+from ehealth.services.notification_service import send_email_notification
+
+status, response = send_email_notification(
+    "jackie.cherotich@outlook.com",
+    "SendGrid Success",
+    "Your notification system is now working."
+)
+
+print(status, response)
+
+
+dsqs jbcg kabb hvcj
+
+JMTVZQRQFN53UR3SFYT5RV3L
+
+
+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   API key

@@ -1,3 +1,8 @@
+"""
+Models related to  records within the telemedicine system.
+Includes appointments, consultations, vital signs, and prescriptions.
+"""
+
 from django.db import models
 from .patient import Patient, ChildProfile
 from .doctor import Doctor
@@ -6,6 +11,9 @@ import uuid
 
 
 class Appointment(models.Model):
+    """
+    Represents an appointment scheduled between a patient and a doctor.
+    """
 
     STATUS = [
         ("pending", "Pending"),
@@ -39,10 +47,12 @@ class Appointment(models.Model):
 
 
 class VitalSign(models.Model):
+    """
+    Represents vital sign readings recorded by a patient.
+    Can be reviewed by doctors during consultations.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="vitals")
-
     systolic_bp = models.IntegerField(null=True)
     diastolic_bp = models.IntegerField(null=True)
     heart_rate = models.IntegerField()
@@ -57,6 +67,10 @@ class VitalSign(models.Model):
         return f"Vitals for {self.patient.user.first_name} on {self.created_at.date()}"
 
     def out_of_range_vitals(self):
+        """
+        Evaluates vital sign values and returns a list of
+        readings that fall outside normal medical ranges.
+        """
 
         alerts = []
 
@@ -79,6 +93,9 @@ class VitalSign(models.Model):
 
 
 class Consultation(models.Model):
+    """
+    Represents a consultation session associated with an approved appointment.
+    """
 
     TYPE = [
         ("chat", "Chat"),
@@ -102,6 +119,10 @@ class Consultation(models.Model):
 
 
 class Prescription(models.Model):
+    """
+    Represents a medical prescription issued by a doctor
+    as a result of consultation.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE,related_name="prescriptions")

@@ -1,3 +1,10 @@
+"""
+Combined registration form for the Telemedicine System.
+
+unified registration form that supports both Patient and Doctor account creation.
+dynamically validates and persists role-specific data and uniqueness constraints.
+"""
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError

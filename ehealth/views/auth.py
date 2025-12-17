@@ -7,14 +7,16 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from ..forms.auth import CombinedRegistrationForm
-
-
-#from ..forms import CombinedRegistrationForm
 from ..models import NewUser
 
 
 
 def register(request):
+    """
+    Handles new user registration.
+    registration requests using the CombinedRegistrationForm.
+    and constructs an email-based activation link for account verification.
+    """
     if request.method == "POST":
         form = CombinedRegistrationForm(request.POST)
 
@@ -48,6 +50,9 @@ def register(request):
 
 
 def activate_account(request, uid, token):
+    """
+    Activates a newly registered user account.
+    """
     try:
         user = NewUser.objects.get(pk=urlsafe_base64_decode(uid).decode())
     except NewUser.DoesNotExist:
@@ -63,13 +68,19 @@ def activate_account(request, uid, token):
         )
         return redirect("ehealth:login")
 
-    messages.error(request, "Activation link is invalid.")
+    messages.error(request, "Recheck.")
     return redirect("ehealth:register")
 
 
 
 
 def user_login(request):
+    """
+    Authenticates users and redirects them based on role.
+    verifies user credentials, checks account activation status,
+    enforces doctor approval requirements, and redirects authenticated
+    users to their respective dashboards.
+    """
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -82,12 +93,12 @@ def user_login(request):
 
         if not user.is_active:
             messages.error(request, "Account not activated.")
-            return redirect("ehealth:login.html")
+            return redirect("ehealth:login")
 
         if user.role == "doctor":
             if not hasattr(user, "doctor") or not user.doctor.is_approved:
                 messages.error(request, "Doctor account pending approval.")
-                return redirect("ehealth:login.html")
+                return redirect("ehealth:login")
 
         login(request, user)
 

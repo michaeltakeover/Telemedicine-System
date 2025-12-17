@@ -7,6 +7,10 @@ from ..models import Doctor, Appointment
 
 @login_required
 def doctor_dashboard(request):
+    """
+    Display the doctor dashboard.
+    Access is restricted to authenticated users with the doctor role.
+    """
     if request.user.role != "doctor":
         messages.error(request, "Access denied.")
         return redirect("ehealth:home")
@@ -35,6 +39,10 @@ def doctor_dashboard(request):
 
 @login_required
 def complete_appointment(request, appointment_id):
+    """
+    Mark an appointment as completed.
+    allows the assigned doctor to mark an appointment as completed once the consultation has finished.
+    """
 
     if request.user.role != "doctor":
         messages.error(request, "Access denied.")

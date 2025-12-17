@@ -85,7 +85,9 @@ CHANNEL_LAYERS = {
     }
 }
 
+SESSION_COOKIE_AGE = 300
 
+SESSION_SAVE_EVERY_REQUEST = True
 
 
 # Database
@@ -162,12 +164,13 @@ STATIC_URL = 'static/'
 
 MEDIA_URL = '/images/'
 
-#STATICFILES_DIRS = [
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/login/"
 
-   # os.path.join(BASE_DIR, 'static'),
 
 
-#]
+
 
 
 
